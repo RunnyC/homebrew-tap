@@ -1,8 +1,8 @@
 class Pasteimage < Formula
   desc "Fast clipboard image saving for macOS"
   homepage "https://github.com/RunnyC/clipboard-image-saver"
-  url "https://github.com/RunnyC/clipboard-image-saver/releases/download/v1.0.0/pasteimage-macos.tar.gz"
-  sha256 "ab3003b4985c5a242d6a46fd6085fd983f87ba844b3026ab379d20493c569c3e"
+  url "https://github.com/RunnyC/clipboard-image-saver/releases/download/v1.0.1/pasteimage-macos.tar.gz"
+  sha256 "1aa73ed886f62abbec56f20b20399032ff395c885742aec8abe7a909eeec4259"
   license "MIT"
 
   depends_on :macos

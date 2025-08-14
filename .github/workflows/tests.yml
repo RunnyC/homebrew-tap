@@ -33,4 +33,4 @@ jobs:
           brew test-bot --only-cleanup-before
           brew test-bot --only-setup
           brew test-bot --only-tap-syntax
-          brew test-bot --only-formulae --root-url=https://ghcr.io/v2/runnyc/tap
+          brew test-bot --only-formulae

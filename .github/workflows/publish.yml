@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Formula/*.rb'
+      - "Formula/*.rb"
 
 jobs:
   publish:
@@ -18,4 +18,5 @@ jobs:
       - name: Test formula
         run: |
           brew test-bot --only-tap-syntax
-          brew test Formula/pasteimage.rb
+          brew audit --strict pasteimage
+

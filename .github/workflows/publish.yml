@@ -1,0 +1,19 @@
+name: Publish to Homebrew
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Formula/*.rb'
+
+jobs:
+  publish:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Test formula
+        run: |
+          brew test-bot --only-tap-syntax
+          brew test-bot --only-formulae-dependents --formula Formula/pasteimage.rb

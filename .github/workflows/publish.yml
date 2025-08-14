@@ -11,9 +11,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup Homebrew
         uses: Homebrew/actions/setup-homebrew@master
+        
       - name: Test formula
         run: |
           brew test-bot --only-tap-syntax
-          brew test-bot --only-formulae-dependents --formula Formula/pasteimage.rb
+          brew test Formula/pasteimage.rb

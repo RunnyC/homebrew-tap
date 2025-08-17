@@ -38,15 +38,11 @@ jobs:
 
       - name: Install all formulas for testing
         run: |
-          IFS=$'\n'
           for f in Formula/*.rb; do
             if [[ -f "$f" ]]; then
               app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
               echo "Installing '$app' on $RUNNER_OS..."
               brew install "runnyc/tap/$app"
-              echo "Checking '$app' version..."
               "$app" --version || true
-              echo "=== Done with '$app' ==="
             fi
           done
-          unset IFS

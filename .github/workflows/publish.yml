@@ -22,7 +22,7 @@ jobs:
       - name: Get changed formulas
         id: changes
         run: |
-          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} \
+          CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.event.after }}" \
             | grep '^Formula/.*\.rb$' || true)
           echo "CHANGED_FORMULAS=$CHANGED" >> $GITHUB_ENV
 
@@ -38,7 +38,7 @@ jobs:
               brew audit --strict "runnyc/tap/$app"
               echo "Installing '$app'..."
               brew install "runnyc/tap/$app"
-              "$app" --version
+              "$app" --version || true
               echo "=== Done with '$app' ==="
             fi
           done

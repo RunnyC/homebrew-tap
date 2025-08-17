@@ -28,17 +28,26 @@ jobs:
 
       - name: Audit and test changed formulas
         run: |
-          # Only process changed .rb formulas
+          if [ -z "$CHANGED_FORMULAS" ]; then
+            echo "No changed formulas detected. Exiting."
+            exit 0
+          fi
+
+          echo "Changed formulas detected:"
+          echo "$CHANGED_FORMULAS"
+
+          IFS=$'\n'  # Split by newline for multiple files
           for f in $CHANGED_FORMULAS; do
-            if [[ "$f" == Formula/*.rb ]]; then
-              # Get formula app name
+            if [[ -f "$f" ]]; then
               app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
-              echo "Processing '$app'"
-              # Audit using formula name instead of file path
-              brew audit --strict runnyc/tap/$app
-              echo "Installing '$app'"
-              # Install from tap directly
-              brew install runnyc/tap/$app
+              echo "=== Processing '$app' ==="
+              echo "Running brew audit on '$app'..."
+              brew audit --strict "runnyc/tap/$app"
+              echo "Installing '$app' from tap..."
+              brew install "runnyc/tap/$app"
+              echo "Checking '$app' version..."
               "$app" --version
+              echo "=== Done with '$app' ==="
             fi
           done
+          unset IFS

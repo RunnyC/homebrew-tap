@@ -28,11 +28,17 @@ jobs:
 
       - name: Audit and test changed formulas
         run: |
+          # Only process changed .rb formulas
           for f in $CHANGED_FORMULAS; do
-            echo "Processing '$f'"
-            brew audit --strict "$f"
-            app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
-            echo "Installing '$app'"
-            brew install "runnyc/tap/$app"
-            "$app" --version
+            if [[ "$f" == Formula/*.rb ]]; then
+              # Get formula app name
+              app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
+              echo "Processing '$app'"
+              # Audit using formula name instead of file path
+              brew audit --strict runnyc/tap/$app
+              echo "Installing '$app'"
+              # Install from tap directly
+              brew install runnyc/tap/$app
+              "$app" --version
+            fi
           done

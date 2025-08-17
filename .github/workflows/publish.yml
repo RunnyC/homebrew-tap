@@ -16,7 +16,25 @@ jobs:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
+      - name: Cache Homebrew Bundler RubyGems
+        id: cache-gems
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ${{ runner.os }}-rubygems-
+
+      - name: Cache Homebrew installed formulas
+        id: cache-formulas
+        uses: actions/cache@v4
+        with:
+          path: /opt/homebrew/Cellar
+          key: ${{ runner.os }}-homebrew-cellar-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-homebrew-cellar-
+
       - name: Install Homebrew Bundler RubyGems
+        if: steps.cache-gems.outputs.cache-hit != 'true'
         run: brew install-bundler-gems
 
       - name: Get changed formulas
@@ -31,7 +49,6 @@ jobs:
           echo "Changed formulas:"
           echo "$CHANGED_FORMULAS"
 
-          # Safe loop over formulas
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             case "$f" in
@@ -40,8 +57,13 @@ jobs:
                 echo "=== Processing '$app' ==="
                 echo "Running brew audit on $app..."
                 brew audit --strict "runnyc/tap/$app"
-                echo "Installing '$app'..."
-                brew install "runnyc/tap/$app"
+
+                # Only install if not already installed
+                if ! brew list "runnyc/tap/$app" >/dev/null 2>&1; then
+                  echo "Installing '$app'..."
+                  brew install "runnyc/tap/$app"
+                fi
+
                 "$app" --version || true
                 echo "=== Done with '$app' ==="
                 ;;

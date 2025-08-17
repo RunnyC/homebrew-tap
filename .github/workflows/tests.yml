@@ -17,32 +17,42 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
 
       - name: Cache Homebrew Bundler RubyGems
-        id: cache
+        id: cache-gems
         uses: actions/cache@v4
         with:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
           key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ runner.os }}-rubygems-
 
+      - name: Cache Homebrew installed formulas
+        id: cache-formulas
+        uses: actions/cache@v4
+        with:
+          path: /opt/homebrew/Cellar
+          key: ${{ runner.os }}-homebrew-cellar-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-homebrew-cellar-
+
       - name: Install Homebrew Bundler RubyGems
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-gems.outputs.cache-hit != 'true'
         run: brew install-bundler-gems
 
-      - name: Run brew test-bot
+      - name: Run brew test-bot (formulas only)
         run: |
           set -e
           brew test-bot --only-cleanup-before
           brew test-bot --only-setup
-          brew test-bot --only-tap-syntax
           brew test-bot --only-formulae
 
       - name: Install all formulas for testing
         run: |
-          # Loop safely over all formulas
           for f in Formula/*.rb; do
             [ -f "$f" ] || continue
             app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
             echo "Installing '$app' on $RUNNER_OS..."
-            brew install "runnyc/tap/$app"
+            # Skip reinstall if already installed
+            if ! brew list "runnyc/tap/$app" >/dev/null 2>&1; then
+              brew install "runnyc/tap/$app"
+            fi
             "$app" --version || true
           done

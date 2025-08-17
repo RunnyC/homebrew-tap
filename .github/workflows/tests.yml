@@ -38,11 +38,11 @@ jobs:
 
       - name: Install all formulas for testing
         run: |
+          # Loop safely over all formulas
           for f in Formula/*.rb; do
-            if [[ -f "$f" ]]; then
-              app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
-              echo "Installing '$app' on $RUNNER_OS..."
-              brew install "runnyc/tap/$app"
-              "$app" --version || true
-            fi
+            [ -f "$f" ] || continue
+            app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
+            echo "Installing '$app' on $RUNNER_OS..."
+            brew install "runnyc/tap/$app"
+            "$app" --version || true
           done

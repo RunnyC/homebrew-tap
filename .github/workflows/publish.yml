@@ -22,18 +22,17 @@ jobs:
       - name: Get changed formulas
         id: changes
         run: |
-          echo "CHANGED_FORMULAS<<EOF" >> $GITHUB_OUTPUT
-          git diff --name-only ${{ github.event.before }} ${{ github.event.after }} \
-            | grep '^Formula/.*\.rb$' || true
-          echo "EOF" >> $GITHUB_OUTPUT
+          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} \
+            | grep '^Formula/.*\.rb$' || true)
+          echo "CHANGED_FORMULAS=$CHANGED" >> $GITHUB_ENV
 
       - name: Audit and test changed formulas
         run: |
-          for f in ${{ steps.changes.outputs.CHANGED_FORMULAS }}; do
-            echo "Processing $f"
+          for f in $CHANGED_FORMULAS; do
+            echo "Processing '$f'"
             brew audit --strict "$f"
             app=$(basename "$f" .rb | tr '[:upper:]' '[:lower:]')
-            echo "Installing $app"
-            brew install runnyc/tap/$app
-            $app --version
+            echo "Installing '$app'"
+            brew install "runnyc/tap/$app"
+            "$app" --version
           done
